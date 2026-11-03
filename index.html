@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>POS — Система</title>
+<title>Пирожковая 7 — Система</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -12,9 +12,12 @@
   --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
 }
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;font-size:15px}
-header{display:flex;align-items:center;gap:16px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;flex-wrap:wrap}
-.logo{font-weight:700;font-size:18px;letter-spacing:.3px}
-nav{display:flex;gap:8px;flex-wrap:wrap}
+header{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.logo-area{display:flex;align-items:center;gap:10px}
+.logo-svg{width:40px;height:40px;fill:none;stroke:#7f5af0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-text{font-weight:800;font-size:20px;letter-spacing:.5px;color:#fff;line-height:1.1}
+.logo-text small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-left:20px}
 nav button{background:var(--panel2);color:var(--muted);border:1px solid var(--line);padding:9px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:.15s}
 nav button:hover{color:var(--text);border-color:#3a4152}
 nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -30,13 +33,19 @@ h2{font-size:16px;font-weight:700;margin-bottom:14px;letter-spacing:.2px}
 h3.sub{font-size:13px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.6px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
 
+/* КАССА */
 .cashier-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}
 @media(max-width:1000px){.cashier-grid{grid-template-columns:1fr}}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:520px;overflow:auto;padding-right:4px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;max-height:520px;overflow:auto;padding-right:4px}
 .product{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.15s;text-align:left}
 .product:hover{border-color:var(--accent);transform:translateY(-2px)}
+.product.out-of-stock{opacity:0.5;cursor:not-allowed;border-color:var(--red)}
+.product.out-of-stock:hover{transform:none}
 .product .p-name{font-weight:600;font-size:14px;margin-bottom:6px;padding-right:24px}
-.product .p-price{color:var(--accent);font-weight:700;font-size:14px}
+.product .p-price{color:var(--accent);font-weight:700;font-size:14px;margin-bottom:6px}
+.product .p-stock{font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:6px}
+.product .p-stock.low{color:var(--amber)}
+.product .p-stock.zero{color:var(--red)}
 .product .p-del{
   position:absolute;top:6px;right:6px;
   width:22px;height:22px;border-radius:6px;
@@ -49,8 +58,12 @@ h3.sub{font-size:13px;color:var(--muted);margin:18px 0 8px;text-transform:upperc
 }
 .product:hover .p-del{opacity:1}
 .product .p-del:hover{background:var(--red);color:#fff;border-color:var(--red)}
-.add-form{display:grid;grid-template-columns:1fr 100px auto;gap:8px}
-@media(max-width:600px){.add-form{grid-template-columns:1fr}}
+.product .stock-controls{display:flex;gap:4px;margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+.product .stock-controls button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px;cursor:pointer;font-size:12px;font-weight:700}
+.product .stock-controls button:hover{border-color:var(--accent);color:var(--accent)}
+
+.add-form{display:grid;grid-template-columns:1fr 100px 80px auto;gap:8px}
+@media(max-width:700px){.add-form{grid-template-columns:1fr 1fr}}
 input{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:14px;outline:none;font-family:inherit}
 input:focus{border-color:var(--accent)}
 button{font-family:inherit}
@@ -65,9 +78,6 @@ button{font-family:inherit}
 .btn.ghost{background:transparent}
 .btn.block{width:100%;margin-top:12px;padding:13px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.toolbar h2{margin:0}
-.toolbar .btn{margin-left:auto;padding:7px 12px;font-size:12.5px}
 
 .cart{display:flex;flex-direction:column;gap:8px;min-height:60px;max-height:340px;overflow:auto}
 .cart-empty{color:var(--muted);font-size:14px;text-align:center;padding:24px 0}
@@ -86,7 +96,7 @@ button{font-family:inherit}
 .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .order-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .order-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.order-num{font-size:20px;font-weight:800;letter-spacing:.5px}
+.order-num{font-size:20px;font-weight:800;letter-spacing:.5px;background:var(--bg);padding:2px 10px;border-radius:8px;border:1px solid var(--line)}
 .badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
 .badge.online{background:rgba(79,140,255,.15);color:#7fa9ff;border:1px solid rgba(79,140,255,.4)}
 .badge.paid{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
@@ -134,8 +144,26 @@ button{font-family:inherit}
 .modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal.hidden{display:none}
 .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px)}
-.modal-body{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:380px;width:100%;max-height:90vh;overflow:auto;animation:slideIn .25s}
-.receipt{background:#fff;color:#111;border-radius:10px;padding:20px 18px;font-family:'Courier New',monospace;font-size:13px;line-height:1.5}
+.modal-body{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:400px;width:100%;max-height:90vh;overflow:auto;animation:slideIn .25s}
+
+/* ОПЛАТА */
+.pay-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
+.pay-total{text-align:center;font-size:16px;color:var(--muted);margin-bottom:16px}
+.pay-total b{color:var(--accent);font-size:20px}
+.pay-methods{display:flex;gap:10px;margin-bottom:16px}
+.pay-methods button{flex:1;padding:16px;border-radius:12px;background:var(--panel2);border:2px solid var(--line);color:var(--text);font-size:16px;font-weight:700;cursor:pointer;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pay-methods button:hover{border-color:var(--accent)}
+.pay-methods button.active{border-color:var(--accent);background:rgba(79,140,255,.1);color:var(--accent)}
+.pay-methods button span{font-size:24px}
+
+.cash-area{background:var(--panel2);padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid var(--line)}
+.cash-input-wrap{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.cash-input-wrap input{flex:1;font-size:18px;padding:14px;text-align:right;font-weight:700;letter-spacing:1px}
+.cash-input-wrap label{font-weight:600;color:var(--muted)}
+.cash-change{font-size:18px;font-weight:800;text-align:right;color:var(--green)}
+.cash-change.error{color:var(--red)}
+
+.receipt{background:#fff;color:#111;border-radius:10px;padding:20px 18px;font-family:'Courier New',monospace;font-size:13px;line-height:1.5;margin-top:16px}
 .r-title{text-align:center;font-weight:800;font-size:17px;letter-spacing:2px}
 .r-sub{text-align:center;font-size:13px;margin-top:2px}
 .r-line{border-top:1px dashed #999;margin:10px 0}
@@ -144,8 +172,6 @@ button{font-family:inherit}
 .r-thanks{text-align:center;margin-top:14px;font-size:12px;color:#555}
 .modal-actions{display:flex;gap:10px;margin-top:16px}
 .modal-actions .btn{flex:1}
-.pay-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
-.pay-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px}
 
 #toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:300}
 .toast{background:var(--panel2);border:1px solid var(--accent);color:var(--text);padding:14px 18px;border-radius:12px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:slideIn .3s;max-width:340px}
@@ -162,11 +188,36 @@ button{font-family:inherit}
 <body>
 
 <header>
-  <div class="logo">🍽 Ресторан · Система</div>
+  <div class="logo-area">
+    <svg class="logo-svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="18" r="6" />
+      <path d="M 50 12 Q 54 6 50 2 Q 46 6 50 12" />
+      <path d="M 56 18 Q 62 14 66 18 Q 62 22 56 18" />
+      <path d="M 44 18 Q 38 14 34 18 Q 38 22 44 18" />
+      <path d="M 50 24 Q 54 30 50 34 Q 46 30 50 24" />
+      <path d="M 30 25 Q 15 15 5 25 Q 15 30 30 25" />
+      <path d="M 70 25 Q 85 15 95 25 Q 85 30 70 25" />
+      <path d="M 35 45 L 65 45 L 55 85 L 45 85 L 52 55 L 35 55 Z" />
+      <path d="M 40 52 Q 45 58 42 65" />
+      <path d="M 48 62 Q 53 68 50 75" />
+      <path d="M 20 88 Q 50 92 80 88" />
+      <path d="M 25 90 Q 50 96 75 90" />
+      <path d="M 30 82 Q 35 75 40 82" />
+      <path d="M 40 84 Q 45 76 50 84" />
+      <path d="M 50 82 Q 55 75 60 82" />
+      <path d="M 60 84 Q 65 76 70 84" />
+      <path d="M 15 95 Q 25 92 35 95 T 55 95 T 75 95 T 95 95" />
+    </svg>
+    <div class="logo-text">
+      Пирожковая 7
+      <small>Панель управления</small>
+    </div>
+  </div>
+  
   <nav>
     <button data-view="cashier" class="active">Касса</button>
-    <button data-view="kitchen">Табло кухня</button>
-    <button data-view="board">Табло заказов</button>
+    <button data-view="kitchen">Кухня</button>
+    <button data-view="board">Табло</button>
   </nav>
   <div class="spacer"></div>
   <span class="conn" id="connStatus">● Подключение…</span>
@@ -179,15 +230,17 @@ button{font-family:inherit}
     <div id="notes" class="notes"></div>
     <div class="cashier-grid">
       <div class="panel">
-        <div class="toolbar">
-          <h2>Товары</h2>
-          <button class="btn danger" onclick="deleteAllProducts()">🗑 Очистить всё</button>
+        <div class="toolbar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <h2 style="margin:0">Витрина / Склад</h2>
+          <button class="btn danger" onclick="deleteAllProducts()" style="padding:7px 12px;font-size:12.5px">🗑 Очистить всё</button>
         </div>
         <div id="products" class="products"></div>
-        <h3 class="sub">Добавить товар в систему</h3>
+        
+        <h3 class="sub">Добавить товар</h3>
         <div class="add-form">
-          <input id="newName" placeholder="Название товара">
+          <input id="newName" placeholder="Название (напр. Пирожок с мясом)">
           <input id="newPrice" type="number" min="1" placeholder="Цена ₽">
+          <input id="newStock" type="number" min="0" placeholder="Кол-во" value="10">
           <button class="btn primary" onclick="addProduct()">+ Добавить</button>
         </div>
       </div>
@@ -201,8 +254,16 @@ button{font-family:inherit}
     </div>
 
     <div class="panel" style="margin-top:20px">
-      <h2>Заказы в работе</h2>
+      <div class="toolbar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h2 style="margin:0">Заказы в работе</h2>
+        <button class="btn" onclick="toggleHistory()">📜 История всех заказов</button>
+      </div>
       <div id="cashierOrders" class="orders-grid"></div>
+      
+      <div id="historyBox" class="hidden" style="margin-top:20px;border-top:1px solid var(--line);padding-top:20px">
+        <h2 style="margin-bottom:14px">История заказов</h2>
+        <div id="cashierHistory" class="orders-grid"></div>
+      </div>
     </div>
   </section>
 
@@ -228,6 +289,31 @@ button{font-family:inherit}
   </section>
 </main>
 
+<!-- МОДАЛКА ОПЛАТЫ -->
+<div id="payment-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closePaymentModal()"></div>
+  <div class="modal-body">
+    <div class="pay-title">Оплата заказа <span id="payOrderNum" style="color:var(--accent)">№---</span></div>
+    <div class="pay-total">К оплате: <b id="payTotal">0 ₽</b></div>
+    
+    <div class="pay-methods">
+      <button id="btn-pay-card" onclick="selectPayMethod('card')"><span>💳</span> Карта</button>
+      <button id="btn-pay-cash" onclick="selectPayMethod('cash')"><span>💵</span> Наличные</button>
+    </div>
+
+    <div id="cash-area" class="cash-area hidden">
+      <div class="cash-input-wrap">
+        <label>Получено:</label>
+        <input type="number" id="cashReceived" oninput="calcChange()" placeholder="0">
+      </div>
+      <div class="cash-change" id="cashChange">Сдача: 0 ₽</div>
+    </div>
+
+    <button class="btn green block" id="confirmPayBtn" onclick="confirmPayment()" disabled>Подтвердить оплату</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА ЧЕКА -->
 <div id="receipt-modal" class="modal hidden">
   <div class="modal-backdrop" onclick="closeModal()"></div>
   <div class="modal-body">
@@ -264,6 +350,12 @@ let state = { products:{}, orders:{}, notes:{} };
 let cart = [];
 let seenNotes = null;
 let kitchenSeen = null;
+let showHistory = false;
+
+// Переменные для оплаты
+let currentPayKey = null;
+let currentPayTotal = 0;
+let selectedMethod = 'card';
 
 const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
@@ -272,6 +364,20 @@ function formatPhone(digits){
   if(!digits || digits.length < 10) return digits || '';
   const d = digits.slice(-10);
   return `+7 (${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6,8)}-${d.slice(8,10)}`;
+}
+
+// Генерация номера заказа: 3 цифры + буква
+function generateOrderNumber(existingOrders) {
+  const letters = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ';
+  for (let i = 0; i < 50; i++) {
+    const num = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const letter = letters[Math.floor(Math.random() * letters.length)];
+    const code = num + letter;
+    if (!existingOrders || !Object.values(existingOrders).some(o => o.num === code)) {
+      return code;
+    }
+  }
+  return Date.now().toString().slice(-4);
 }
 
 function toast(text){
@@ -326,6 +432,7 @@ onValue(ref(db, 'products'), snap => {
 onValue(ref(db, 'orders'), snap => {
   state.orders = snap.val() || {};
   renderCashierOrders();
+  renderHistory();
   renderKitchen();
   renderBoard();
 });
@@ -348,17 +455,26 @@ onValue(ref(db, 'notes'), snap => {
   renderNotes();
 });
 
+// --- Корзина ---
 function addProductById(key){
   const p = state.products[key];
   if(!p) return;
+  const stock = p.stock !== undefined ? p.stock : 999;
+  const inCart = cart.find(i => i.productKey === key)?.qty || 0;
+  if(inCart >= stock){ toast('На складе больше нет'); return; }
+
   const ex = cart.find(i => i.productKey === key);
   if(ex) ex.qty++;
   else cart.push({productKey:key, name:p.name, price:p.price, qty:1});
   renderCart();
 }
 function changeQty(idx, delta){
-  cart[idx].qty += delta;
-  if(cart[idx].qty <= 0) cart.splice(idx,1);
+  const item = cart[idx];
+  const p = state.products[item.productKey];
+  const stock = p && p.stock !== undefined ? p.stock : 999;
+  if(delta > 0 && item.qty >= stock){ toast('На складе больше нет'); return; }
+  item.qty += delta;
+  if(item.qty <= 0) cart.splice(idx,1);
   renderCart();
 }
 function removeItem(idx){ cart.splice(idx,1); renderCart(); }
@@ -385,30 +501,55 @@ function renderCart(){
   $('cartTotal').textContent = fmt(cartTotal());
 }
 
+// --- Товары ---
 function renderProducts(){
   const entries = Object.entries(state.products);
   $('products').innerHTML = entries.length
-    ? entries.map(([key, p]) => `
-        <div class="product" onclick="addProductById('${key}')">
+    ? entries.map(([key, p]) => {
+        const stock = p.stock !== undefined ? p.stock : 999;
+        let stockClass = '';
+        if(stock === 0) stockClass = 'zero';
+        else if(stock < 5) stockClass = 'low';
+
+        return `
+        <div class="product ${stock === 0 ? 'out-of-stock' : ''}" onclick="${stock > 0 ? `addProductById('${key}')` : ''}">
           <button class="p-del" title="Удалить товар"
                   onclick="event.stopPropagation(); deleteProduct('${key}', '${esc(p.name).replace(/'/g,"\\'")}')">×</button>
           <div class="p-name">${esc(p.name)}</div>
           <div class="p-price">${fmt(p.price)}</div>
+          <div class="p-stock ${stockClass}">📦 Остаток: ${stock === 999 ? '∞' : stock} шт.</div>
+          <div class="stock-controls" onclick="event.stopPropagation()">
+            <button onclick="updateStock('${key}', -1)">-1</button>
+            <button onclick="updateStock('${key}', 1)">+1</button>
+            <button onclick="updateStock('${key}', 10)">+10</button>
+          </div>
         </div>
-      `).join('')
+      `}).join('')
     : '<div class="cart-empty">Товаров нет. Добавьте первый товар ниже.</div>';
 }
 
 async function addProduct(){
   const name = $('newName').value.trim();
   const price = parseInt($('newPrice').value, 10);
+  const stock = parseInt($('newStock').value, 10) || 0;
   if(!name || !price || price <= 0){ toast('Введите название и цену'); return; }
   try {
-    await push(ref(db, 'products'), {name, price});
+    await push(ref(db, 'products'), {name, price, stock});
     $('newName').value = '';
     $('newPrice').value = '';
-    toast(`Товар «${name}» добавлен`);
+    toast(`Товар «${name}» добавлен (Остаток: ${stock})`);
   } catch(e){ toast('Ошибка: ' + e.message); }
+}
+
+async function updateStock(key, delta){
+  try {
+    await runTransaction(ref(db, `products/${key}/stock`), cur => {
+      let val = cur !== null ? cur : 999;
+      if(val === 999 && delta < 0) return val;
+      val += delta;
+      return val < 0 ? 0 : val;
+    });
+  } catch(e){ toast('Ошибка изменения остатка: ' + e.message); }
 }
 
 async function deleteProduct(key, name){
@@ -418,9 +559,7 @@ async function deleteProduct(key, name){
     cart = cart.filter(i => i.productKey !== key);
     renderCart();
     toast(`Товар «${name}» удалён`);
-  } catch(e){
-    toast('Ошибка удаления: ' + e.message);
-  }
+  } catch(e){ toast('Ошибка удаления: ' + e.message); }
 }
 
 async function deleteAllProducts(){
@@ -435,9 +574,27 @@ async function deleteAllProducts(){
   } catch(e){ toast('Ошибка: ' + e.message); }
 }
 
+// --- Заказы ---
 async function createOrder(items, total, source, phone){
-  const txn = await runTransaction(ref(db, 'settings/nextOrderId'), cur => (cur || 0) + 1);
-  const num = txn.snapshot.val();
+  for(let item of items){
+    const prodEntry = Object.entries(state.products).find(([,p]) => p.name === item.name);
+    if(prodEntry){
+      const [prodKey, prod] = prodEntry;
+      const currentStock = prod.stock !== undefined ? prod.stock : 999;
+      if(currentStock !== 999) {
+        await runTransaction(ref(db, `products/${prodKey}/stock`), cur => {
+          let val = cur !== null ? cur : 999;
+          if(val !== 999) {
+            val -= item.qty;
+            return val < 0 ? 0 : val;
+          }
+          return val;
+        });
+      }
+    }
+  }
+
+  const num = generateOrderNumber(state.orders);
   const orderRef = push(ref(db, 'orders'));
   const payload = {
     num, items, total, source,
@@ -461,14 +618,85 @@ async function checkout(){
   } catch(e){ toast('Ошибка: ' + e.message); }
 }
 
-async function payOrder(key){
+// --- ОПЛАТА ---
+function openPaymentModal(key){
   const o = state.orders[key];
   if(!o || o.paid) return;
+  currentPayKey = key;
+  currentPayTotal = o.total;
+  
+  $('payOrderNum').textContent = '№' + o.num;
+  $('payTotal').textContent = fmt(o.total);
+  $('cashReceived').value = '';
+  $('cashChange').textContent = 'Сдача: 0 ₽';
+  $('cashChange').className = 'cash-change';
+  $('cash-area').classList.add('hidden');
+  $('confirmPayBtn').disabled = true;
+  
+  selectPayMethod('card');
+  $('payment-modal').classList.remove('hidden');
+}
+
+function closePaymentModal(){
+  $('payment-modal').classList.add('hidden');
+  currentPayKey = null;
+}
+
+function selectPayMethod(method){
+  selectedMethod = method;
+  $('btn-pay-card').classList.toggle('active', method === 'card');
+  $('btn-pay-cash').classList.toggle('active', method === 'cash');
+  
+  if(method === 'cash'){
+    $('cash-area').classList.remove('hidden');
+    $('cashReceived').focus();
+    calcChange();
+  } else {
+    $('cash-area').classList.add('hidden');
+    $('confirmPayBtn').disabled = false;
+  }
+}
+
+function calcChange(){
+  const received = parseInt($('cashReceived').value, 10) || 0;
+  const change = received - currentPayTotal;
+  const el = $('cashChange');
+  
+  if(received === 0){
+    el.textContent = 'Сдача: 0 ₽';
+    el.className = 'cash-change';
+    $('confirmPayBtn').disabled = true;
+  } else if(change < 0){
+    el.textContent = `Не хватает: ${fmt(Math.abs(change))}`;
+    el.className = 'cash-change error';
+    $('confirmPayBtn').disabled = true;
+  } else {
+    el.textContent = `Сдача: ${fmt(change)}`;
+    el.className = 'cash-change';
+    $('confirmPayBtn').disabled = false;
+  }
+}
+
+async function confirmPayment(){
+  if(!currentPayKey) return;
+  const o = state.orders[currentPayKey];
+  if(!o) return;
+  
+  const received = parseInt($('cashReceived').value, 10) || 0;
+  const change = selectedMethod === 'cash' ? received - o.total : 0;
+  
   try {
-    await update(ref(db, `orders/${key}`), {paid:true});
-    openReceipt({...o, paid:true});
-    toast(`Заказ №${o.num} оплачен`);
-  } catch(e){ toast('Ошибка: ' + e.message); }
+    await update(ref(db, `orders/${currentPayKey}`), {
+      paid: true,
+      payMethod: selectedMethod,
+      cashReceived: selectedMethod === 'cash' ? received : null,
+      cashChange: selectedMethod === 'cash' ? change : null
+    });
+    
+    closePaymentModal();
+    openReceipt({...o, paid: true, payMethod: selectedMethod, cashReceived: received, cashChange: change});
+    toast(`Заказ №${o.num} оплачен (${selectedMethod === 'cash' ? 'Наличные' : 'Карта'})`);
+  } catch(e){ toast('Ошибка оплаты: ' + e.message); }
 }
 
 async function markReady(key){
@@ -515,10 +743,43 @@ function renderNotes(){
   `).join('');
 }
 
+// --- Отображение заказов ---
+function orderCardHTML(key, o) {
+  const statusBadge = o.ready
+    ? '<span class="badge ready">Готов</span>'
+    : '<span class="badge cook">Готовится</span>';
+  
+  const payBadge = o.paid 
+    ? `<span class="badge paid">${o.payMethod === 'cash' ? 'Наличные' : 'Карта'}</span>` 
+    : '';
+
+  return `
+    <div class="order-card">
+      <div class="order-head">
+        <span class="order-num">№${o.num}</span>
+        ${o.source === 'online' ? '<span class="badge online">Онлайн</span>' : ''}
+        ${o.paid ? payBadge : '<span class="badge unpaid">Не оплачен</span>'}
+        ${statusBadge}
+      </div>
+      ${o.phone ? `<div class="order-phone">📱 ${formatPhone(o.phone)}</div>` : ''}
+      <ul class="order-items">
+        ${o.items.map(i=>`<li><span>${i.qty}× ${esc(i.name)}</span><span>${i.price*i.qty} ₽</span></li>`).join('')}
+      </ul>
+      <div class="order-total"><span>Итого</span><span>${fmt(o.total)}</span></div>
+      <div class="order-actions">
+        ${!o.paid ? `<button class="btn green" onclick="openPaymentModal('${key}')">Оплатить</button>` : ''}
+        ${o.paid ? `<button class="btn" onclick="openReceiptByKey('${key}')">🧾 Чек</button>` : ''}
+        ${!o.ready ? `<button class="btn primary" onclick="markReady('${key}')">Готово</button>` : ''}
+        ${o.ready ? `<button class="btn" onclick="markIssued('${key}')">Выдан</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function renderCashierOrders(){
   const list = Object.entries(state.orders)
     .filter(([,o]) => !o.issued)
-    .sort((a,b) => b[1].num - a[1].num);
+    .sort((a,b) => b[1].createdAt - a[1].createdAt);
   const box = $('cashierOrders');
 
   if(!list.length){
@@ -526,38 +787,34 @@ function renderCashierOrders(){
     return;
   }
 
-  box.innerHTML = list.map(([key, o]) => {
-    const statusBadge = o.ready
-      ? '<span class="badge ready">Готов</span>'
-      : '<span class="badge cook">Готовится</span>';
-    return `
-      <div class="order-card">
-        <div class="order-head">
-          <span class="order-num">№${o.num}</span>
-          ${o.source === 'online' ? '<span class="badge online">Онлайн</span>' : ''}
-          <span class="badge ${o.paid ? 'paid' : 'unpaid'}">${o.paid ? 'Оплачен' : 'Не оплачен'}</span>
-          ${statusBadge}
-        </div>
-        ${o.phone ? `<div class="order-phone">📱 ${formatPhone(o.phone)}</div>` : ''}
-        <ul class="order-items">
-          ${o.items.map(i=>`<li><span>${i.qty}× ${esc(i.name)}</span><span>${i.price*i.qty} ₽</span></li>`).join('')}
-        </ul>
-        <div class="order-total"><span>Итого</span><span>${fmt(o.total)}</span></div>
-        <div class="order-actions">
-          ${!o.paid ? `<button class="btn green" onclick="payOrder('${key}')">Оплатить</button>` : ''}
-          ${o.paid ? `<button class="btn" onclick="openReceiptByKey('${key}')">🧾 Чек</button>` : ''}
-          ${!o.ready ? `<button class="btn primary" onclick="markReady('${key}')">Готово</button>` : ''}
-          ${o.ready ? `<button class="btn" onclick="markIssued('${key}')">Выдан</button>` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
+  box.innerHTML = list.map(([key, o]) => orderCardHTML(key, o)).join('');
+}
+
+function toggleHistory(){
+  showHistory = !showHistory;
+  $('historyBox').classList.toggle('hidden', !showHistory);
+  if(showHistory) renderHistory();
+}
+
+function renderHistory(){
+  if(!showHistory) return;
+  const list = Object.entries(state.orders)
+    .filter(([,o]) => o.issued)
+    .sort((a,b) => b[1].createdAt - a[1].createdAt);
+  const box = $('cashierHistory');
+
+  if(!list.length){
+    box.innerHTML = '<div class="kempty">История пуста</div>';
+    return;
+  }
+
+  box.innerHTML = list.map(([key, o]) => orderCardHTML(key, o)).join('');
 }
 
 function renderKitchen(){
   const list = Object.entries(state.orders)
     .filter(([,o]) => !o.kitchenDone && !o.issued)
-    .sort((a,b) => a[1].num - b[1].num);
+    .sort((a,b) => a[1].createdAt - b[1].createdAt);
 
   if(kitchenSeen === null){
     kitchenSeen = new Set(list.map(([k])=>k));
@@ -594,8 +851,8 @@ function renderKitchen(){
 
 function renderBoard(){
   const active = Object.entries(state.orders).filter(([,o]) => !o.issued);
-  const cooking = active.filter(([,o]) => !o.ready).sort((a,b)=>a[1].num - b[1].num);
-  const ready   = active.filter(([,o]) => o.ready).sort((a,b)=>a[1].num - b[1].num);
+  const cooking = active.filter(([,o]) => !o.ready).sort((a,b)=>a[1].createdAt - b[1].createdAt);
+  const ready   = active.filter(([,o]) => o.ready).sort((a,b)=>a[1].createdAt - b[1].createdAt);
 
   const card = ([,o]) => `
     <div class="bcard ${o.ready ? 'ready' : 'cooking'}">
@@ -611,13 +868,27 @@ function renderBoard(){
     : '<div class="bempty">Пусто</div>';
 }
 
+// --- Чек ---
 function receiptHTML(o){
   const d = new Date(o.createdAt);
   const dateStr = d.toLocaleString('ru-RU', {
     day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
   });
+  
+  let payInfo = '';
+  if(o.paid) {
+    if(o.payMethod === 'cash'){
+      payInfo = `
+        <div class="r-item"><span>Наличные:</span><span>${o.cashReceived} ₽</span></div>
+        <div class="r-item"><span>Сдача:</span><span>${o.cashChange} ₽</span></div>
+      `;
+    } else {
+      payInfo = `<div class="r-item"><span>Оплата:</span><span>Картой</span></div>`;
+    }
+  }
+
   return `
-    <div class="r-title">РЕСТОРАН</div>
+    <div class="r-title">ПИРОЖКОВАЯ 7</div>
     <div class="r-sub">Чек № ${o.num}</div>
     ${o.phone ? `<div class="r-sub">${formatPhone(o.phone)}</div>` : ''}
     <div class="r-line"></div>
@@ -625,6 +896,7 @@ function receiptHTML(o){
     <div class="r-line"></div>
     <div class="r-item r-total"><span>ИТОГО</span><span>${o.total} ₽</span></div>
     <div class="r-line"></div>
+    ${payInfo}
     <div class="r-item"><span>${o.source === 'online' ? 'Онлайн-заказ' : 'Касса'}</span><span>${o.paid ? 'Оплачено' : 'Не оплачено'}</span></div>
     <div class="r-item"><span>${dateStr}</span><span></span></div>
     <div class="r-thanks">Спасибо за заказ!</div>
@@ -658,9 +930,10 @@ async function resetOrders(){
 
 Object.assign(window, {
   addProductById, changeQty, removeItem, checkout, addProduct,
-  deleteProduct, deleteAllProducts,
-  payOrder, markReady, markIssued, kitchenDone, dismissNote,
-  openReceiptByKey, closeModal, resetOrders
+  deleteProduct, deleteAllProducts, updateStock,
+  openPaymentModal, closePaymentModal, selectPayMethod, calcChange, confirmPayment,
+  markReady, markIssued, kitchenDone, dismissNote,
+  openReceiptByKey, closeModal, resetOrders, toggleHistory
 });
 </script>
 </body>
