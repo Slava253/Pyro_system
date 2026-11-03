@@ -80,7 +80,7 @@ button{font-family:inherit}
 .btn.block{width:100%;margin-top:12px;padding:13px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 
-.cart{display:flex;flex-direction:column;gap:8px;min-height:60px;max-height:340px;overflow:auto}
+.cart{display:flex;flex-direction:column;gap:8px;min-height:60px;max-height:300px;overflow:auto}
 .cart-empty{color:var(--muted);font-size:14px;text-align:center;padding:24px 0}
 .cart-row{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .cart-row .ci-name{flex:1;font-size:14px}
@@ -91,7 +91,13 @@ button{font-family:inherit}
 .ci-price{font-weight:700;font-size:14px;min-width:70px;text-align:right}
 .del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px}
 .del:hover{color:var(--red)}
-.cart-total{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-size:16px}
+
+.checkout-section{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.phone-input-wrap{margin-bottom:10px}
+.phone-input-wrap label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.phone-input-wrap input{width:100%;font-size:15px;padding:12px;text-align:center;font-weight:600}
+
+.cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px}
 .cart-total b{font-size:20px;color:var(--accent)}
 
 .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
@@ -249,8 +255,15 @@ button{font-family:inherit}
       <div class="panel">
         <h2>Корзина</h2>
         <div id="cart" class="cart"></div>
-        <div class="cart-total"><span>Итого</span><b id="cartTotal">0 ₽</b></div>
-        <button class="btn primary block" onclick="checkout()">Оформить заказ</button>
+        
+        <div class="checkout-section">
+          <div class="phone-input-wrap">
+            <label>📱 Телефон клиента (необязательно)</label>
+            <input id="checkoutPhone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel">
+          </div>
+          <div class="cart-total"><span>Итого</span><b id="cartTotal">0 ₽</b></div>
+          <button class="btn primary block" onclick="checkout()">Оформить заказ</button>
+        </div>
       </div>
     </div>
 
@@ -353,7 +366,6 @@ let seenNotes = null;
 let kitchenSeen = null;
 let showHistory = false;
 
-// Переменные для оплаты
 let currentPayKey = null;
 let currentPayTotal = 0;
 let selectedMethod = 'card';
@@ -361,13 +373,19 @@ let selectedMethod = 'card';
 const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
 function formatPhone(digits){
   if(!digits || digits.length < 10) return digits || '';
   const d = digits.slice(-10);
   return `+7 (${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6,8)}-${d.slice(8,10)}`;
 }
+function normalizePhone(raw){
+  let d = String(raw).replace(/\D/g, '');
+  if(d.length === 11 && d[0] === '8') d = '7' + d.slice(1);
+  if(d.length === 10) d = '7' + d;
+  return d.length === 11 ? d : '';
+}
 
-// Генерация номера заказа: 3 цифры + буква
 function generateOrderNumber(existingOrders) {
   const letters = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ';
   for (let i = 0; i < 50; i++) {
@@ -456,7 +474,6 @@ onValue(ref(db, 'notes'), snap => {
   renderNotes();
 });
 
-// --- Корзина ---
 function addProductById(key){
   const p = state.products[key];
   if(!p) return;
@@ -502,7 +519,6 @@ function renderCart(){
   $('cartTotal').textContent = fmt(cartTotal());
 }
 
-// --- Товары ---
 function renderProducts(){
   const entries = Object.entries(state.products);
   $('products').innerHTML = entries.length
@@ -577,7 +593,6 @@ async function deleteAllProducts(){
   } catch(e){ toast('Ошибка: ' + e.message); }
 }
 
-// --- Заказы ---
 async function createOrder(items, total, source, phone){
   for(let item of items){
     const prodEntry = Object.entries(state.products).find(([,p]) => p.name === item.name);
@@ -611,17 +626,29 @@ async function createOrder(items, total, source, phone){
 
 async function checkout(){
   if(!cart.length){ toast('Корзина пуста'); return; }
+  
+  // Получаем телефон из инпута
+  const rawPhone = $('checkoutPhone').value.trim();
+  let phone = null;
+  if(rawPhone){
+    phone = normalizePhone(rawPhone);
+    if(!phone){ 
+      toast('Введите корректный номер телефона или оставьте поле пустым'); 
+      return; 
+    }
+  }
+
   const items = cart.map(i => ({name:i.name, price:i.price, qty:i.qty}));
   const total = cartTotal();
   try {
-    const num = await createOrder(items, total, 'pos', null);
+    const num = await createOrder(items, total, 'pos', phone);
     cart = [];
+    $('checkoutPhone').value = '';
     renderCart();
-    toast(`Заказ №${num} оформлен — отправлен на кухню`);
+    toast(`Заказ №${num} оформлен ${phone ? '(клиент: ' + formatPhone(phone) + ')' : ''}`);
   } catch(e){ toast('Ошибка: ' + e.message); }
 }
 
-// --- ОПЛАТА ---
 function openPaymentModal(key){
   const o = state.orders[key];
   if(!o || o.paid) return;
@@ -746,7 +773,6 @@ function renderNotes(){
   `).join('');
 }
 
-// --- Отображение заказов ---
 function orderCardHTML(key, o) {
   const statusBadge = o.ready
     ? '<span class="badge ready">Готов</span>'
@@ -871,7 +897,6 @@ function renderBoard(){
     : '<div class="bempty">Пусто</div>';
 }
 
-// --- Чек ---
 function receiptHTML(o){
   const d = new Date(o.createdAt);
   const dateStr = d.toLocaleString('ru-RU', {
