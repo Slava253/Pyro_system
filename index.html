@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Пирожковая 7 — Система</title>
+<title>Пирожковая: я7 (семья) — Система</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,8 +15,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-ap
 header{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;flex-wrap:wrap}
 .logo-area{display:flex;align-items:center;gap:10px}
 .logo-svg{width:40px;height:40px;fill:none;stroke:#7f5af0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.logo-text{font-weight:800;font-size:20px;letter-spacing:.5px;color:#fff;line-height:1.1}
-.logo-text small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.logo-text{font-weight:800;font-size:18px;letter-spacing:.5px;color:#fff;line-height:1.1}
+.logo-text .y7{color:#7f5af0}
+.logo-text small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:2px}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-left:20px}
 nav button{background:var(--panel2);color:var(--muted);border:1px solid var(--line);padding:9px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:.15s}
 nav button:hover{color:var(--text);border-color:#3a4152}
@@ -164,7 +165,7 @@ button{font-family:inherit}
 .cash-change.error{color:var(--red)}
 
 .receipt{background:#fff;color:#111;border-radius:10px;padding:20px 18px;font-family:'Courier New',monospace;font-size:13px;line-height:1.5;margin-top:16px}
-.r-title{text-align:center;font-weight:800;font-size:17px;letter-spacing:2px}
+.r-title{text-align:center;font-weight:800;font-size:16px;letter-spacing:1px}
 .r-sub{text-align:center;font-size:13px;margin-top:2px}
 .r-line{border-top:1px dashed #999;margin:10px 0}
 .r-item{display:flex;justify-content:space-between;gap:10px}
@@ -209,8 +210,8 @@ button{font-family:inherit}
       <path d="M 15 95 Q 25 92 35 95 T 55 95 T 75 95 T 95 95" />
     </svg>
     <div class="logo-text">
-      Пирожковая 7
-      <small>Панель управления</small>
+      Пирожковая: <span class="y7">я7</span>
+      <small>(семья) · Панель управления</small>
     </div>
   </div>
   
@@ -559,7 +560,9 @@ async function deleteProduct(key, name){
     cart = cart.filter(i => i.productKey !== key);
     renderCart();
     toast(`Товар «${name}» удалён`);
-  } catch(e){ toast('Ошибка удаления: ' + e.message); }
+  } catch(e){
+    toast('Ошибка удаления: ' + e.message);
+  }
 }
 
 async function deleteAllProducts(){
@@ -888,7 +891,7 @@ function receiptHTML(o){
   }
 
   return `
-    <div class="r-title">ПИРОЖКОВАЯ 7</div>
+    <div class="r-title">ПИРОЖКОВАЯ: Я7 (СЕМЬЯ)</div>
     <div class="r-sub">Чек № ${o.num}</div>
     ${o.phone ? `<div class="r-sub">${formatPhone(o.phone)}</div>` : ''}
     <div class="r-line"></div>
