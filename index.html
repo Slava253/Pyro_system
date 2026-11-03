@@ -33,11 +33,23 @@ h3.sub{font-size:13px;color:var(--muted);margin:18px 0 8px;text-transform:upperc
 /* КАССА */
 .cashier-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}
 @media(max-width:1000px){.cashier-grid{grid-template-columns:1fr}}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-height:520px;overflow:auto}
-.product{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.15s;text-align:left}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:520px;overflow:auto;padding-right:4px}
+.product{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.15s;text-align:left}
 .product:hover{border-color:var(--accent);transform:translateY(-2px)}
-.product .p-name{font-weight:600;font-size:14px;margin-bottom:6px}
+.product .p-name{font-weight:600;font-size:14px;margin-bottom:6px;padding-right:24px}
 .product .p-price{color:var(--accent);font-weight:700;font-size:14px}
+.product .p-del{
+  position:absolute;top:6px;right:6px;
+  width:22px;height:22px;border-radius:6px;
+  background:rgba(239,68,68,.12);color:#f87171;
+  border:1px solid rgba(239,68,68,.35);
+  font-size:14px;font-weight:700;line-height:1;
+  cursor:pointer;opacity:0;transition:.15s;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;font-family:inherit;
+}
+.product:hover .p-del{opacity:1}
+.product .p-del:hover{background:var(--red);color:#fff;border-color:var(--red)}
 .add-form{display:grid;grid-template-columns:1fr 100px auto;gap:8px}
 @media(max-width:600px){.add-form{grid-template-columns:1fr}}
 input{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:14px;outline:none;font-family:inherit}
@@ -49,9 +61,14 @@ button{font-family:inherit}
 .btn.primary:hover{filter:brightness(1.1)}
 .btn.green{background:var(--green);border-color:var(--green);color:#04250f}
 .btn.green:hover{filter:brightness(1.1)}
+.btn.danger{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);color:#f87171}
+.btn.danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
 .btn.ghost{background:transparent}
 .btn.block{width:100%;margin-top:12px;padding:13px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.toolbar h2{margin:0}
+.toolbar .btn{margin-left:auto;padding:7px 12px;font-size:12.5px}
 
 .cart{display:flex;flex-direction:column;gap:8px;min-height:60px;max-height:340px;overflow:auto}
 .cart-empty{color:var(--muted);font-size:14px;text-align:center;padding:24px 0}
@@ -83,7 +100,6 @@ button{font-family:inherit}
 .order-actions{display:flex;gap:8px;flex-wrap:wrap}
 .order-actions .btn{flex:1;padding:9px 10px;font-size:13px;min-width:80px}
 
-/* УВЕДОМЛЕНИЯ В КАССЕ */
 .notes{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
 .note{display:flex;align-items:center;gap:12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.45);color:#6ee7a0;padding:12px 16px;border-radius:12px;font-weight:600;animation:slideIn .3s ease}
 @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
@@ -136,7 +152,6 @@ button{font-family:inherit}
 .pay-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
 .pay-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px}
 
-/* ТОСТЫ */
 #toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:300}
 .toast{background:var(--panel2);border:1px solid var(--accent);color:var(--text);padding:14px 18px;border-radius:12px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:slideIn .3s;max-width:340px}
 
@@ -170,7 +185,10 @@ button{font-family:inherit}
     <div id="notes" class="notes"></div>
     <div class="cashier-grid">
       <div class="panel">
-        <h2>Товары</h2>
+        <div class="toolbar">
+          <h2>Товары</h2>
+          <button class="btn danger" onclick="deleteAllProducts()">🗑 Очистить всё</button>
+        </div>
         <div id="products" class="products"></div>
         <h3 class="sub">Добавить товар в систему</h3>
         <div class="add-form">
@@ -336,6 +354,9 @@ setInterval(()=>{
 onValue(ref(db, 'products'), snap => {
   state.products = snap.val() || {};
   renderProducts();
+  // Чистим корзину от удалённых товаров
+  cart = cart.filter(i => state.products[i.productKey]);
+  renderCart();
 });
 
 onValue(ref(db, 'orders'), snap => {
@@ -407,6 +428,8 @@ function renderProducts(){
   $('products').innerHTML = entries.length
     ? entries.map(([key, p]) => `
         <div class="product" onclick="addProductById('${key}')">
+          <button class="p-del" title="Удалить товар"
+                  onclick="event.stopPropagation(); deleteProduct('${key}', '${esc(p.name).replace(/'/g,"\\'")}')">×</button>
           <div class="p-name">${esc(p.name)}</div>
           <div class="p-price">${fmt(p.price)}</div>
         </div>
@@ -423,6 +446,30 @@ async function addProduct(){
     $('newName').value = '';
     $('newPrice').value = '';
     toast(`Товар «${name}» добавлен`);
+  } catch(e){ toast('Ошибка: ' + e.message); }
+}
+
+async function deleteProduct(key, name){
+  if(!confirm(`Удалить товар «${name}»?`)) return;
+  try {
+    await remove(ref(db, `products/${key}`));
+    cart = cart.filter(i => i.productKey !== key);
+    renderCart();
+    toast(`Товар «${name}» удалён`);
+  } catch(e){
+    toast('Ошибка удаления: ' + e.message);
+  }
+}
+
+async function deleteAllProducts(){
+  const count = Object.keys(state.products).length;
+  if(!count){ toast('Товаров и так нет'); return; }
+  if(!confirm(`Удалить ВСЕ ${count} товаров? Это действие необратимо.`)) return;
+  try {
+    await remove(ref(db, 'products'));
+    cart = [];
+    renderCart();
+    toast('Все товары удалены');
   } catch(e){ toast('Ошибка: ' + e.message); }
 }
 
@@ -656,6 +703,7 @@ async function resetOrders(){
 /* ============== ЭКСПОРТ В WINDOW ============== */
 Object.assign(window, {
   addProductById, changeQty, removeItem, checkout, addProduct,
+  deleteProduct, deleteAllProducts,
   payOrder, markReady, markIssued, kitchenDone, dismissNote,
   openReceiptByKey, closeModal, resetOrders
 });
